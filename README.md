@@ -124,6 +124,7 @@ git clone https://github.com/XRayWatch-Dev/xraywatch-node-agent.git /opt/xraywat
 
 ```dotenv
 XRAYWATCH_CONTROL_URL=https://control.example.com
+XRAYWATCH_CONTROL_FALLBACK_URLS=https://panel.example.com
 XRAYWATCH_TRUST_KEY=BASE64_ED25519_PUBLIC_KEY
 XRAYWATCH_LISTEN_PORT=18443
 XRAYWATCH_VERSION=latest
@@ -138,7 +139,7 @@ XRAYWATCH_STATE_VOLUME=xraywatch-node-agent-state
 /opt/xraywatch-agent/install.sh
 ```
 
-Скрипт проверит конфигурацию, загрузит образ и запросит одноразовый токен из
+Скрипт проверит конфигурацию, соберёт образ и запросит одноразовый токен из
 панели в интерактивном режиме.
 
 ## Настройка
@@ -146,6 +147,7 @@ XRAYWATCH_STATE_VOLUME=xraywatch-node-agent-state
 | Переменная | Обязательна | По умолчанию | Назначение |
 | --- | :---: | --- | --- |
 | `XRAYWATCH_CONTROL_URL` | да | — | HTTPS-адрес control API |
+| `XRAYWATCH_CONTROL_FALLBACK_URLS` | нет | — | Резервные HTTPS-адреса control API через запятую |
 | `XRAYWATCH_TRUST_KEY` | да | — | Публичный Ed25519-ключ в Base64 для проверки probe tickets |
 | `XRAYWATCH_LISTEN_PORT` | нет | `18443` | Порт, который агент слушает одновременно по TCP и UDP |
 | `XRAYWATCH_VERSION` | нет | `latest` | Тег контейнерного образа; для production лучше закрепить релизный тег |

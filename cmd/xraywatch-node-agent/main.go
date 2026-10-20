@@ -30,6 +30,10 @@ func main() {
 		return
 	}
 	controlURL := mustEnv("XRAYWATCH_CONTROL_URL")
+	fallbackURLs, err := control.ParseFallbackURLs(env("XRAYWATCH_CONTROL_FALLBACK_URLS", ""))
+	if err != nil {
+		log.Fatalf("invalid XRAYWATCH_CONTROL_FALLBACK_URLS: %v", err)
+	}
 	stateDir := env("XRAYWATCH_STATE_DIR", "/var/lib/xraywatch")
 	port, err := strconv.Atoi(env("XRAYWATCH_LISTEN_PORT", "18443"))
 	if err != nil || port < 1 || port > 65535 {
@@ -59,7 +63,7 @@ func main() {
 			_ = state.AppendObservation(stateDir, state.Observation{RunID: event.RunID, EndpointID: event.EndpointID, ObservedAt: event.ObservedAt.Format(time.RFC3339Nano), Stages: map[string]any{event.Protocol: map[string]any{"bytes": event.Bytes, "complete": true}}})
 		}
 	}()
-	client := &control.Client{BaseURL: controlURL, NodeID: identity.NodeID, Secret: identity.Secret, Version: version}
+	client := &control.Client{BaseURL: controlURL, FallbackURLs: fallbackURLs, NodeID: identity.NodeID, Secret: identity.Secret, Version: version}
 	log.Printf("XRayWatch node agent version=%s node_id=%s listen_port=%d", version, identity.NodeID, port)
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()

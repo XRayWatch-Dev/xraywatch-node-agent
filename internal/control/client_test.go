@@ -2,6 +2,7 @@ package control
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,6 +19,52 @@ func TestValidateBaseURL(t *testing.T) {
 		if _, err := validateBaseURL(invalid); err == nil {
 			t.Errorf("validateBaseURL(%q) unexpectedly succeeded", invalid)
 		}
+	}
+}
+
+func TestParseFallbackURLs(t *testing.T) {
+	got, err := ParseFallbackURLs(" https://backup-a.example.com/, https://backup-b.example.com,https://backup-a.example.com ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fmt.Sprint(got) != "[https://backup-a.example.com https://backup-b.example.com]" {
+		t.Fatalf("unexpected fallback URLs: %v", got)
+	}
+	if _, err := ParseFallbackURLs("http://public.example.com"); err == nil {
+		t.Fatal("insecure fallback URL accepted")
+	}
+}
+
+func TestClientAdvancesToFallbackAfterTransportFailure(t *testing.T) {
+	primary := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hijacker, ok := w.(http.Hijacker)
+		if !ok {
+			t.Fatal("response writer cannot hijack")
+		}
+		conn, _, err := hijacker.Hijack()
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = conn.Close()
+	}))
+	defer primary.Close()
+
+	fallbackCalls := 0
+	fallback := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fallbackCalls++
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer fallback.Close()
+
+	client := &Client{BaseURL: primary.URL, FallbackURLs: []string{fallback.URL}, NodeID: "node", Secret: "secret", Version: "test"}
+	if err := client.Heartbeat(context.Background(), 18443); err == nil {
+		t.Fatal("primary transport failure unexpectedly succeeded")
+	}
+	if err := client.Heartbeat(context.Background(), 18443); err != nil {
+		t.Fatalf("fallback heartbeat: %v", err)
+	}
+	if fallbackCalls != 1 {
+		t.Fatalf("fallback calls=%d want 1", fallbackCalls)
 	}
 }
 

@@ -14,6 +14,7 @@ import (
 	"net/netip"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -21,7 +22,10 @@ const maxControlResponse = 1 << 20
 
 type Client struct {
 	BaseURL, NodeID, Secret, Version string
+	FallbackURLs                     []string
 	HTTP                             *http.Client
+	mu                               sync.Mutex
+	activeURL                        int
 }
 
 func (c *Client) request(ctx context.Context, method, path string, input, output any) error {
@@ -33,7 +37,7 @@ func (c *Client) request(ctx context.Context, method, path string, input, output
 			return err
 		}
 	}
-	baseURL, err := validateBaseURL(c.BaseURL)
+	baseURL, err := c.currentBaseURL()
 	if err != nil {
 		return err
 	}
@@ -63,17 +67,60 @@ func (c *Client) request(ctx context.Context, method, path string, input, output
 	client := secureHTTPClient(c.HTTP)
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		c.advanceBaseURL()
+		return fmt.Errorf("control request via %s: %w", baseURL, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode/100 != 2 {
 		b, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		if resp.StatusCode >= 500 {
+			c.advanceBaseURL()
+		}
 		return fmt.Errorf("control HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(b)))
 	}
 	if output != nil {
 		return decodeResponse(resp.Body, output)
 	}
 	return nil
+}
+
+func ParseFallbackURLs(raw string) ([]string, error) {
+	items := make([]string, 0)
+	seen := make(map[string]struct{})
+	for _, value := range strings.Split(raw, ",") {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		validated, err := validateBaseURL(value)
+		if err != nil {
+			return nil, err
+		}
+		if _, exists := seen[validated]; exists {
+			continue
+		}
+		seen[validated] = struct{}{}
+		items = append(items, validated)
+	}
+	return items, nil
+}
+
+func (c *Client) currentBaseURL() (string, error) {
+	urls := append([]string{c.BaseURL}, c.FallbackURLs...)
+	c.mu.Lock()
+	index := c.activeURL % len(urls)
+	c.mu.Unlock()
+	return validateBaseURL(urls[index])
+}
+
+func (c *Client) advanceBaseURL() {
+	count := 1 + len(c.FallbackURLs)
+	if count < 2 {
+		return
+	}
+	c.mu.Lock()
+	c.activeURL = (c.activeURL + 1) % count
+	c.mu.Unlock()
 }
 
 func (c *Client) Heartbeat(ctx context.Context, port int) error {
