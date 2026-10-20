@@ -5,8 +5,19 @@ cd "$script_dir"
 command -v docker >/dev/null 2>&1 || { echo "Docker is required" >&2; exit 1; }
 docker compose version --short >/dev/null 2>&1 || { echo "Docker Compose v2 is required" >&2; exit 1; }
 [ -f .env ] || { echo "Missing .env; copy .env.example to .env and configure it first" >&2; exit 1; }
+: "${XRAYWATCH_CONTROL_URL:?set XRAYWATCH_CONTROL_URL}"
+: "${XRAYWATCH_TRUST_KEY:?set XRAYWATCH_TRUST_KEY}"
+XRAYWATCH_LISTEN_PORT=${XRAYWATCH_LISTEN_PORT:-18443}
+XRAYWATCH_VERSION=${XRAYWATCH_VERSION:-$(cat VERSION)}
+escape_env() { printf '%s' "$1" | sed 's/[|&\\]/\\&/g'; }
+sed -i \
+  -e "s|^XRAYWATCH_CONTROL_URL=.*|XRAYWATCH_CONTROL_URL=$(escape_env "$XRAYWATCH_CONTROL_URL")|" \
+  -e "s|^XRAYWATCH_TRUST_KEY=.*|XRAYWATCH_TRUST_KEY=$(escape_env "$XRAYWATCH_TRUST_KEY")|" \
+  -e "s|^XRAYWATCH_LISTEN_PORT=.*|XRAYWATCH_LISTEN_PORT=$(escape_env "$XRAYWATCH_LISTEN_PORT")|" \
+  -e "s|^XRAYWATCH_VERSION=.*|XRAYWATCH_VERSION=$(escape_env "$XRAYWATCH_VERSION")|" \
+  .env
 docker compose config >/dev/null
-docker compose pull
+docker compose build
 docker compose run --rm -it xraywatch-node-agent --enroll
 docker compose up -d
 echo "XRayWatch node agent started. Firewall rules were not changed."

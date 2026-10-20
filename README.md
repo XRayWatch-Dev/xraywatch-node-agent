@@ -22,9 +22,6 @@
 XRayWatch — сервис мониторинга VPN-инфраструктуры и доступности подключений.
 Панель проекта: [xray.watch](https://xray.watch).
 
-> Репозиторий готовится к первой публичной версии. До публикации релиза образ
-> `ghcr.io/xraywatch-dev/xraywatch-node-agent` может быть недоступен.
-
 ## Содержание
 
 - [Как это работает](#как-это-работает)
@@ -201,7 +198,7 @@ cd /opt/xraywatch-agent && docker compose exec xraywatch-node-agent /xraywatch-n
 ### Обновление
 
 ```sh
-cd /opt/xraywatch-agent && git pull --ff-only && docker compose up -d
+cd /opt/xraywatch-agent && git pull --ff-only && docker compose build && docker compose up -d
 ```
 
 Для предсказуемого production-обновления в `.env` указывается конкретный
