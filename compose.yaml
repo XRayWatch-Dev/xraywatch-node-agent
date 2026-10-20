@@ -1,0 +1,29 @@
+services:
+  xraywatch-node-agent:
+    image: ghcr.io/xraywatch-dev/xraywatch-node-agent:${XRAYWATCH_VERSION:-latest}
+    pull_policy: always
+    network_mode: host
+    restart: unless-stopped
+    # Bound blast radius if the public probe port is flooded.
+    pids_limit: 128
+    mem_limit: 128m
+    cpus: 0.50
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 1024
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      XRAYWATCH_CONTROL_URL: ${XRAYWATCH_CONTROL_URL:?set XRAYWATCH_CONTROL_URL}
+      XRAYWATCH_LISTEN_PORT: ${XRAYWATCH_LISTEN_PORT:-18443}
+      XRAYWATCH_STATE_DIR: /var/lib/xraywatch
+      XRAYWATCH_TRUST_KEY: ${XRAYWATCH_TRUST_KEY:?set XRAYWATCH_TRUST_KEY}
+    volumes:
+      - xraywatch-state:/var/lib/xraywatch
+
+volumes:
+  xraywatch-state:
+    name: ${XRAYWATCH_STATE_VOLUME:-xraywatch-node-agent-state}
+
