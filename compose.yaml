@@ -1,8 +1,7 @@
 services:
   xraywatch-node-agent:
-    build:
-      context: .
-    pull_policy: build
+    image: ghcr.io/xraywatch-dev/xraywatch-node-agent:${XRAYWATCH_VERSION:-latest}
+    pull_policy: always
     network_mode: host
     restart: unless-stopped
     # Bound blast radius if the public probe port is flooded.

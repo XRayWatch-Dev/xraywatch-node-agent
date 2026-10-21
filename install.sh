@@ -17,7 +17,7 @@ sed -i \
   -e "s|^XRAYWATCH_LISTEN_PORT=.*|XRAYWATCH_LISTEN_PORT=$(escape_env "$XRAYWATCH_LISTEN_PORT")|" \
   .env
 docker compose config >/dev/null
-docker compose build
+docker compose pull
 docker compose run --rm -it xraywatch-node-agent --enroll
 docker compose up -d
 echo "XRayWatch node agent started. Firewall rules were not changed."

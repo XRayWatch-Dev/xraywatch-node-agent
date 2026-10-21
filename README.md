@@ -139,7 +139,7 @@ XRAYWATCH_STATE_VOLUME=xraywatch-node-agent-state
 /opt/xraywatch-agent/install.sh
 ```
 
-Скрипт проверит конфигурацию, соберёт образ и запросит одноразовый токен из
+Скрипт проверит конфигурацию, скачает готовый образ и запросит одноразовый токен из
 панели в интерактивном режиме.
 
 ## Настройка
@@ -150,7 +150,7 @@ XRAYWATCH_STATE_VOLUME=xraywatch-node-agent-state
 | `XRAYWATCH_CONTROL_FALLBACK_URLS` | нет | — | Резервные HTTPS-адреса control API через запятую |
 | `XRAYWATCH_TRUST_KEY` | да | — | Публичный Ed25519-ключ в Base64 для проверки probe tickets |
 | `XRAYWATCH_LISTEN_PORT` | нет | `18443` | Порт, который агент слушает одновременно по TCP и UDP |
-| `XRAYWATCH_VERSION` | нет | `latest` | Тег контейнерного образа; для production лучше закрепить релизный тег |
+| `XRAYWATCH_VERSION` | нет | `latest` | Тег готового образа из GHCR; при необходимости можно закрепить релиз, например `v0.1.1` |
 | `XRAYWATCH_STATE_VOLUME` | нет | `xraywatch-node-agent-state` | Имя Docker volume с идентичностью и очередью наблюдений |
 
 `XRAYWATCH_STATE_DIR` — внутренняя настройка контейнера. При обычной установке
@@ -203,8 +203,8 @@ cd /opt/xraywatch-agent && docker compose exec xraywatch-node-agent /xraywatch-n
 cd /opt/xraywatch-agent && git pull --ff-only && docker compose down && docker compose up -d
 ```
 
-При запуске Compose пересобирает образ из актуальных исходников. Версия берётся
-из файла `VERSION`; регистрация и накопленные данные сохраняются в Docker volume.
+При запуске Compose скачивает актуальный образ из GHCR. Go и локальная сборка на
+VPS не требуются; регистрация и накопленные данные сохраняются в Docker volume.
 
 ### Остановка
 

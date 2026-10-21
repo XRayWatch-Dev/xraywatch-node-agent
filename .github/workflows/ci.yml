@@ -22,4 +22,4 @@ jobs:
         env:
           XRAYWATCH_CONTROL_URL: https://control.example.com
           XRAYWATCH_TRUST_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
-      - run: docker build --build-arg VERSION="$(cat VERSION)" -t xraywatch-node-agent:test .
+      - run: docker build -t xraywatch-node-agent:test .
