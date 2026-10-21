@@ -1,6 +1,6 @@
 services:
   xraywatch-node-agent:
-    image: ghcr.io/xraywatch-dev/xraywatch-node-agent:${XRAYWATCH_VERSION:-latest}
+    image: ghcr.io/xraywatch-dev/xraywatch-node-agent:${XRAYWATCH_IMAGE_TAG:-latest}
     pull_policy: always
     network_mode: host
     restart: unless-stopped

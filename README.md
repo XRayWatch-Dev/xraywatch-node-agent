@@ -127,7 +127,7 @@ XRAYWATCH_CONTROL_URL=https://control.example.com
 XRAYWATCH_CONTROL_FALLBACK_URLS=https://panel.example.com
 XRAYWATCH_TRUST_KEY=BASE64_ED25519_PUBLIC_KEY
 XRAYWATCH_LISTEN_PORT=18443
-XRAYWATCH_VERSION=latest
+XRAYWATCH_IMAGE_TAG=latest
 XRAYWATCH_STATE_VOLUME=xraywatch-node-agent-state
 ```
 
@@ -150,7 +150,7 @@ XRAYWATCH_STATE_VOLUME=xraywatch-node-agent-state
 | `XRAYWATCH_CONTROL_FALLBACK_URLS` | нет | — | Резервные HTTPS-адреса control API через запятую |
 | `XRAYWATCH_TRUST_KEY` | да | — | Публичный Ed25519-ключ в Base64 для проверки probe tickets |
 | `XRAYWATCH_LISTEN_PORT` | нет | `18443` | Порт, который агент слушает одновременно по TCP и UDP |
-| `XRAYWATCH_VERSION` | нет | `latest` | Тег готового образа из GHCR; при необходимости можно закрепить релиз, например `v0.1.1` |
+| `XRAYWATCH_IMAGE_TAG` | нет | `latest` | Тег готового образа из GHCR; при необходимости можно закрепить релиз, например `v0.1.1` |
 | `XRAYWATCH_STATE_VOLUME` | нет | `xraywatch-node-agent-state` | Имя Docker volume с идентичностью и очередью наблюдений |
 
 `XRAYWATCH_STATE_DIR` — внутренняя настройка контейнера. При обычной установке
