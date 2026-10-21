@@ -2,8 +2,7 @@ services:
   xraywatch-node-agent:
     build:
       context: .
-      args:
-        VERSION: ${XRAYWATCH_VERSION:-dev}
+    pull_policy: build
     network_mode: host
     restart: unless-stopped
     # Bound blast radius if the public probe port is flooded.

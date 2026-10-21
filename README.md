@@ -200,11 +200,11 @@ cd /opt/xraywatch-agent && docker compose exec xraywatch-node-agent /xraywatch-n
 ### Обновление
 
 ```sh
-cd /opt/xraywatch-agent && git pull --ff-only && XRAYWATCH_VERSION="$(cat VERSION)" docker compose up -d --build
+cd /opt/xraywatch-agent && git pull --ff-only && docker compose down && docker compose up -d
 ```
 
-Команда пересобирает образ из обновлённых исходников и передаёт в сборку версию
-из файла `VERSION`. Регистрация и накопленные данные сохраняются в Docker volume.
+При запуске Compose пересобирает образ из актуальных исходников. Версия берётся
+из файла `VERSION`; регистрация и накопленные данные сохраняются в Docker volume.
 
 ### Остановка
 

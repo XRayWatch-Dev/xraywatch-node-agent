@@ -3,8 +3,8 @@ WORKDIR /src
 COPY go.mod ./
 COPY cmd ./cmd
 COPY internal ./internal
-ARG VERSION=dev
-RUN GOMAXPROCS=1 GOMEMLIMIT=320MiB CGO_ENABLED=0 go build -p=1 -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/xraywatch-node-agent ./cmd/xraywatch-node-agent
+COPY VERSION ./VERSION
+RUN VERSION=$(cat VERSION) && GOMAXPROCS=1 GOMEMLIMIT=320MiB CGO_ENABLED=0 go build -p=1 -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/xraywatch-node-agent ./cmd/xraywatch-node-agent
 RUN mkdir -p /out/state && touch /out/state/.keep
 
 FROM scratch
