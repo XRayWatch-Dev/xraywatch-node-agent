@@ -200,11 +200,11 @@ cd /opt/xraywatch-agent && docker compose exec xraywatch-node-agent /xraywatch-n
 ### Обновление
 
 ```sh
-cd /opt/xraywatch-agent && git pull --ff-only && docker compose build && docker compose up -d
+cd /opt/xraywatch-agent && git pull --ff-only && XRAYWATCH_VERSION="$(cat VERSION)" docker compose up -d --build
 ```
 
-Для предсказуемого production-обновления в `.env` указывается конкретный
-релизный тег, например `XRAYWATCH_VERSION=v0.1.0`, вместо `latest`.
+Команда пересобирает образ из обновлённых исходников и передаёт в сборку версию
+из файла `VERSION`. Регистрация и накопленные данные сохраняются в Docker volume.
 
 ### Остановка
 
